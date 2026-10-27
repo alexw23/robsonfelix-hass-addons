@@ -234,7 +234,8 @@ CMD ["/bin/bash", "-c", "\
     echo '[INFO] Removed a Supervisor token that older versions persisted into settings.json'; \
     echo '[INFO] That file lives in your HA config dir and is included in backups'; \
   fi && \
-  if ! grep -qw avx /proc/cpuinfo 2>/dev/null; then \
+  case \"$(uname -m)\" in x86_64|i?86) IS_X86=true ;; *) IS_X86=false ;; esac && \
+  if [ \"$IS_X86\" = \"true\" ] && ! grep -qw avx /proc/cpuinfo 2>/dev/null; then \
     echo '[WARN] This CPU does not expose AVX. Claude Code 2.1.113+ is a Bun-compiled'; \
     echo '[WARN] binary that requires it, so this add-on is running an older release.'; \
     echo '[WARN] On Proxmox set the VM CPU type to \"host\" (or x86-64-v3), then fully'; \
