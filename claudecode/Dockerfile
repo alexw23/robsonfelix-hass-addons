@@ -76,6 +76,8 @@ RUN pip3 install --no-cache-dir --break-system-packages hass-mcp pymodbus pyseri
 RUN pip3 install --no-cache-dir --break-system-packages \
     --no-binary claude-agent-sdk "claude-agent-sdk>=0.2" aiohttp
 COPY rootfs/usr/local/lib/voice-bridge/bridge.py /usr/local/lib/voice-bridge/bridge.py
+COPY rootfs/usr/local/bin/voice-sessions /usr/local/bin/voice-sessions
+RUN chmod +x /usr/local/bin/voice-sessions
 
 # Install mbpoll (Modbus command line tool) from source
 RUN apk add --no-cache --virtual .build-deps \

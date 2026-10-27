@@ -1,0 +1,42 @@
+#!/usr/bin/env python3
+"""List voice-bridge tasks with the command to open each one in the terminal.
+
+`claude --resume` (the picker) leaves out SDK sessions, so bridge tasks only
+open by id.
+"""
+
+import json
+import sys
+import time
+from pathlib import Path
+
+STATE_FILE = Path("/data/voice_bridge_tasks.json")
+LIVE = ("starting", "running", "waiting_permission")
+
+
+def ago(ts: float) -> str:
+    m = int((time.time() - ts) / 60)
+    if m < 60:
+        return f"{m}m ago"
+    if m < 48 * 60:
+        return f"{m // 60}h ago"
+    return f"{m // (24 * 60)}d ago"
+
+
+def main() -> int:
+    if not STATE_FILE.exists():
+        print("No voice tasks yet (is the voice_bridge option on?).")
+        return 0
+    tasks = json.loads(STATE_FILE.read_text()).get("tasks", [])
+    limit = int(sys.argv[1]) if len(sys.argv) > 1 else 10
+    for t in sorted(tasks, key=lambda t: t["updated"], reverse=True)[:limit]:
+        live = t["status"] in LIVE
+        print(f"{t['id']:>4}  {t['status']:<18} {ago(t['updated']):>8}  {t['prompt'][:70]}")
+        if t.get("session_id"):
+            note = "   # still running: wait for it to finish" if live else ""
+            print(f"      claude --resume {t['session_id']}{note}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

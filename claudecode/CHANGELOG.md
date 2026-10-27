@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.3] - 2026-10-27
+
+### Changed
+- Voice bridge closes a finished task's CLI process after 2 minutes instead of 30. Follow-ups resume from the saved session as before. Idle CLIs hold ~100-300 MB each, and on a 4 GB Raspberry Pi two of them got the interactive terminal session OOM-killed
+
+### Added
+- Voice prompt: a final message ending in "?" is now asked aloud and answered by voice, so Claude is told to end with a question only when it needs an answer, and to read speech-to-text answers charitably
+- `voice-sessions` terminal command: lists recent voice-bridge tasks with the `claude --resume <id>` command for each. The `claude --resume` picker leaves out SDK sessions, so bridge tasks are only reachable by id
+
 ## [1.3.2] - 2026-10-27
 
 ### Fixed

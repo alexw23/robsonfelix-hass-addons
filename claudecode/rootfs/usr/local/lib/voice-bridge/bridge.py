@@ -67,8 +67,10 @@ PROJECTS = {
     "homeassistant": {"path": "/homeassistant", "aliases": ["home assistant", "ha", "home", "house"]},
 }
 
-# How long an idle task keeps its CLI process; later messages resume it.
-IDLE_DISCONNECT_S = 30 * 60
+# How long an idle task keeps its CLI process; later messages resume it from
+# the saved session. Kept short: each idle CLI holds ~100-300 MB, and on a 4 GB
+# Pi a couple of them got the interactive terminal session OOM-killed.
+IDLE_DISCONNECT_S = 2 * 60
 # Unanswered permission prompts are denied after this.
 PERMISSION_TIMEOUT_S = 30 * 60
 # After a result, wait this long for queued messages before calling it done.
@@ -85,6 +87,10 @@ the user needs to decide. Before finishing a config change, validate it
 Tools that need approval are sent to the user's phone; if one is denied, carry
 on without it and say what you would have done. Don't use AskUserQuestion —
 pick the sensible default and mention it, or stop and ask in your final message.
+A final message that ends with a question mark is asked aloud and the user's
+spoken answer comes back to you, so end with a question only when you need an
+answer to continue, and never close with offers like "Want me to…?".
+Spoken answers go through speech-to-text: read them charitably.
 """
 
 log = logging.getLogger("voice-bridge")
