@@ -2,10 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.3.1] - 2026-10-27
+## [1.3.2] - 2026-10-27
 
 ### Fixed
 - The missing-AVX warning fired on every ARM host (Raspberry Pi, aarch64). AVX is an x86 extension, so `/proc/cpuinfo` never lists it there; the check now only runs on x86
+
+## [1.3.1] - 2026-10-27
+
+### Fixed
 - Voice bridge installed claude-agent-sdk 0.1.7. The base image's `/etc/pip.conf` sets `prefer-binary`, and newer SDK releases ship only platform wheels (none for musl) plus an sdist, so pip fell back to the last pure wheel. The SDK is now built from source with a `>=0.2` floor
 
 ## [1.3.0] - 2026-10-27
