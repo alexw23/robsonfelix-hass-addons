@@ -68,6 +68,12 @@ RUN chmod +x /usr/local/bin/install-claude.sh && /usr/local/bin/install-claude.s
 # Install hass-mcp for Home Assistant integration and pymodbus for Modbus operations
 RUN pip3 install --no-cache-dir --break-system-packages hass-mcp pymodbus pyserial
 
+# Voice bridge (opt-in, voice_bridge option): HA Assist -> Claude Agent SDK sessions
+# in /homeassistant. Alpine gets the SDK sdist, which has no bundled CLI; the
+# bridge drives the claude installed above.
+RUN pip3 install --no-cache-dir --break-system-packages claude-agent-sdk aiohttp
+COPY rootfs/usr/local/lib/voice-bridge/bridge.py /usr/local/lib/voice-bridge/bridge.py
+
 # Install mbpoll (Modbus command line tool) from source
 RUN apk add --no-cache --virtual .build-deps \
     build-base \
@@ -293,6 +299,20 @@ CMD ["/bin/bash", "-c", "\
     SHELL_CMD='bash --login'; \
   fi && \
   if [ \"$REMOTE_CONTROL\" = \"true\" ]; then export CLAUDE_REMOTE_CONTROL_SESSION_NAME_PREFIX=\"$RC_SESSION_PREFIX\"; fi && \
+  VOICE_BRIDGE=$(jq -r '.voice_bridge // false' /data/options.json) && \
+  if [ \"$VOICE_BRIDGE\" = \"true\" ]; then \
+    if [ -z \"$(jq -r '.voice_bridge_token // \"\"' /data/options.json)\" ] || [ -z \"$(jq -r '.voice_bridge_webhook_id // \"\"' /data/options.json)\" ]; then \
+      echo '[WARN] voice_bridge is on but voice_bridge_token or voice_bridge_webhook_id is empty; not starting it'; \
+    else \
+      ( cd /homeassistant && \
+        export VOICE_BRIDGE_TOKEN=\"$(jq -r '.voice_bridge_token' /data/options.json)\" && \
+        export VOICE_BRIDGE_WEBHOOK_ID=\"$(jq -r '.voice_bridge_webhook_id' /data/options.json)\" && \
+        while true; do python3 /usr/local/lib/voice-bridge/bridge.py; echo '[WARN] Voice bridge exited; restarting in 5s'; sleep 5; done ) & \
+      echo '[INFO] Voice bridge started on port 8791 (hassio network only)'; \
+    fi; \
+  else \
+    echo '[INFO] Voice bridge disabled'; \
+  fi && \
   cd /homeassistant && \
   exec ttyd --port 7681 --writable --ping-interval 30 --max-clients 5 \
     -t fontSize=$FONT_SIZE \

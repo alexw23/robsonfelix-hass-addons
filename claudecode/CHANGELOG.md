@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-10-27
+
+### Added
+- Voice bridge (opt-in `voice_bridge` option). A small aiohttp service on port 8791 that lets Home Assistant start and follow up Claude Code tasks in `/homeassistant` through the Claude Agent SDK, e.g. from Assist scripts via `rest_command`. API: `POST /tasks`, `POST /tasks/{ref}/message`, `GET /tasks`, `POST /tasks/{ref}/permission`. Finished tasks and tool-approval requests are posted to the HA webhook `voice_bridge_webhook_id`. Requests must come from the hassio network (172.30.32.0/23) and carry `voice_bridge_token`; the port is not published to the host. Tasks run in `acceptEdits`; any other tool that needs approval waits (up to 30 min) for an answer from HA. Task history persists in `/data/voice_bridge_tasks.json`
+
 ## [1.2.65] - 2026-07-08
 
 ### Security

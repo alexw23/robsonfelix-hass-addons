@@ -57,6 +57,24 @@ configuration:
       Prefix for auto-generated Remote Control session names visible in claude.ai/code
       and the Claude mobile app. Defaults to "HomeAssistant", producing names like
       "HomeAssistant-graceful-unicorn". Only applies when Enable Remote Control is on.
+  voice_bridge:
+    name: Enable Voice Bridge
+    description: >-
+      Run a small HTTP service (port 8791, reachable only from the Supervisor's
+      internal network, not published to the host) so Home Assistant scripts can
+      start Claude Code tasks in /homeassistant, e.g. from Assist. Finished tasks
+      and approval requests are posted back to a Home Assistant webhook. File edits
+      in /homeassistant are auto-accepted; anything else is sent for approval.
+  voice_bridge_token:
+    name: Voice Bridge Token
+    description: >-
+      Bearer token Home Assistant must send ("Authorization: Bearer <token>").
+      Use a long random string.
+  voice_bridge_webhook_id:
+    name: Voice Bridge Webhook ID
+    description: >-
+      ID of the Home Assistant webhook trigger that receives task_finished and
+      permission_request events (posted to http://homeassistant:8123/api/webhook/<id>).
 
 network:
   7681/tcp: Web Terminal (ttyd)
