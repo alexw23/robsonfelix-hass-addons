@@ -70,8 +70,11 @@ RUN pip3 install --no-cache-dir --break-system-packages hass-mcp pymodbus pyseri
 
 # Voice bridge (opt-in, voice_bridge option): HA Assist -> Claude Agent SDK sessions
 # in /homeassistant. Alpine gets the SDK sdist, which has no bundled CLI; the
-# bridge drives the claude installed above.
-RUN pip3 install --no-cache-dir --break-system-packages claude-agent-sdk aiohttp
+# bridge drives the claude installed above. The base image's pip.conf sets
+# prefer-binary, which would pick 0.1.7 (the last pure wheel) over newer
+# sdist-only releases, so build the SDK from source.
+RUN pip3 install --no-cache-dir --break-system-packages \
+    --no-binary claude-agent-sdk "claude-agent-sdk>=0.2" aiohttp
 COPY rootfs/usr/local/lib/voice-bridge/bridge.py /usr/local/lib/voice-bridge/bridge.py
 
 # Install mbpoll (Modbus command line tool) from source
